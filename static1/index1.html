@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ethereum Insurance</title>
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+    <script>
+        let web3;
+        let userAccount;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const statusDiv = document.getElementById("status");
+            const connectButton = document.getElementById("connectButton");
+            const createPolicyButton = document.getElementById("createPolicyButton");
+
+            connectButton.addEventListener("click", async function () {
+                if (!window.ethereum) {
+                    alert("MetaMask is not installed. Please install it to connect your wallet.");
+                    return;
+                }
+
+                try {
+                    web3 = new Web3(window.ethereum);
+                    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+                    userAccount = accounts[0];
+
+                    if (!userAccount) {
+                        alert("Failed to connect wallet.");
+                        return;
+                    }
+
+                    statusDiv.innerText = `Connected: ${userAccount}`;
+
+                    // Sign a message to verify ownership
+                    const message = "Confirm wallet connection";
+                    const signature = await window.ethereum.request({
+                        method: "personal_sign",
+                        params: [message, userAccount],
+                    });
+
+                    console.log("User signature:", signature);
+
+                    // Send to backend for verification
+                    const response = await fetch("/connect-wallet", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ address: userAccount, signature: signature }),
+                    });
+
+                    const data = await response.json();
+                    alert(data.message);
+
+                } catch (error) {
+                    console.error("Connection failed:", error);
+                    statusDiv.innerText = "Error connecting to MetaMask.";
+                }
+            });
+
+            createPolicyButton.addEventListener("click", async function () {
+                console.log("Start create policy");
+
+                if (!userAccount) {
+                    alert("Please connect your wallet first.");
+                    return;
+                }
+
+                // Get values from input fields
+                const policyName = document.getElementById("policyName").value;
+                const premium = parseFloat(document.getElementById("premium").value); // Convert to number
+                const coverageAmount = parseFloat(document.getElementById("coverageAmount").value); // Convert to number
+
+                // Validate input fields
+                if (!policyName || isNaN(premium) || isNaN(coverageAmount)) {
+                    alert("Please fill in all fields correctly.");
+                    return;
+                }
+
+                try {
+                    // Call create-policy API
+                    const response = await fetch(`/create-policy`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            address: userAccount,
+                            policy_name: policyName,
+                            premium: premium,
+                            coverage_amount: coverageAmount,
+                        }),
+                    });
+
+                    const txData = await response.json();
+                    console.log("Unsigned Transaction:", txData);
+
+                    if (!txData.to) {
+                        alert("Transaction error: Missing 'to' address.");
+                        console.error("Transaction data missing 'to' field:", txData);
+                        return;
+                    }
+
+                    txData.from = userAccount;  // Ensure the transaction is sent from the connected wallet
+                    // Convert values to hexadecimal format
+                    txData.value = web3.utils.toHex(txData.value);
+                    txData.gas = web3.utils.toHex(txData.gas);
+                    txData.maxFeePerGas = web3.utils.toHex(txData.maxFeePerGas);
+                    txData.maxPriorityFeePerGas = web3.utils.toHex(txData.maxPriorityFeePerGas);
+
+                    console.log("Data ready to send:", txData);
+
+
+                    // Show MetaMask confirmation with ETH amount
+                    const signedTx = await web3.eth.sendTransaction(txData);
+
+                    alert(`Transaction sent! TxHash: ${signedTx.transactionHash}`);
+
+                } catch (error) {
+                    console.error("Transaction failed:", error);
+                    alert("Transaction failed. Check console for details.");
+                }
+            });
+        });
+        // Function to fetch all policies from the backend API
+
+        async function getPolicies() {
+            const response = await fetch("/get-policies", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ address: userAccount}),
+            });
+            const policies = await response.json();
+            console.log("getPolicies calling");
+            if (!userAccount) {
+                alert("Please connect your wallet first.");
+                return;
+            }
+
+            let policyList = "";
+            policies.forEach(policy => {
+                policyList += `
+                    <tr>
+                        <td>${policy.policyName}</td>
+                        <td>${policy.premium}</td>
+                        <td>${policy.coverageAmount}</td>
+                        <td>${policy.isActive ? "Active" : "Inactive"}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById("policyTable").innerHTML = policyList;
+        }
+
+    </script>
+</head>
+<body>
+    <h2>Ethereum Insurance Policy</h2>
+    <div id="status">Not Connected</div>
+    <button id="connectButton">Connect Wallet</button>
+
+    <h2>Create Policy</h2>
+    <label for="policyName">Policy Name: </label>
+    <input type="text" id="policyName" required><br><br>
+
+    <label for="premium">Premium (ETH): </label>
+    <input type="number" id="premium" required step="0.01"><br><br>
+
+    <label for="coverageAmount">Coverage Amount (ETH): </label>
+    <input type="number" id="coverageAmount" required step="0.01"><br><br>
+
+    <button id="createPolicyButton">Create Policy</button>
+
+<!--    showing all existing policies-->
+    <h2>Existing Policies</h2>
+    <button onclick="getPolicies()">Load Policies</button>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Policy Name</th>
+                <th>Premium</th>
+                <th>Coverage Amount</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="policyTable">
+            <!-- Policies will be listed here -->
+        </tbody>
+    </table>
+
+</body>
+</html>
