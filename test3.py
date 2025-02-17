@@ -60,7 +60,6 @@ async def connect_wallet(data: WalletData):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid Ethereum address: {str(e)}")
 
-    # connected_address = address
     print(f"Wallet connected: {connected_address}")
 
     return {"message": "Wallet connected and verified successfully!"}

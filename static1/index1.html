@@ -135,11 +135,16 @@
 
             let policyList = "";
             policies.forEach(policy => {
+                // Convert Wei to Ether for more user-friendly display-
+                // comment next two lines if you wish to show values in Wei
+                const premiumInEther = Web3.utils.fromWei(policy.premium.toString(), 'ether');
+                const coverageAmountInEther = Web3.utils.fromWei(policy.coverageAmount.toString(), 'ether');
+
                 policyList += `
                     <tr>
                         <td>${policy.policyName}</td>
-                        <td>${policy.premium}</td>
-                        <td>${policy.coverageAmount}</td>
+                        <td>${premiumInEther}</td>
+                        <td>${coverageAmountInEther}</td>
                         <td>${policy.isActive ? "Active" : "Inactive"}</td>
                     </tr>
                 `;
