@@ -29,7 +29,7 @@
                         return;
                     }
 
-                    statusDiv.innerText = `Connected: ${userAccount}`;
+                    statusDiv.innerText = `Connecting: ${userAccount}`;
 
                     // Sign a message to verify ownership
                     const message = "Confirm wallet connection";
@@ -37,6 +37,8 @@
                         method: "personal_sign",
                         params: [message, userAccount],
                     });
+
+                    statusDiv.innerText = `Connected: ${userAccount}`;
 
                     console.log("User signature:", signature);
 
@@ -137,6 +139,7 @@
             policies.forEach(policy => {
                 // Convert Wei to Ether for more user-friendly display-
                 // comment next two lines if you wish to show values in Wei
+                //and use policy.premium and policy.coverageAmount in place of premiumInEther and coverageAmountInEther
                 const premiumInEther = Web3.utils.fromWei(policy.premium.toString(), 'ether');
                 const coverageAmountInEther = Web3.utils.fromWei(policy.coverageAmount.toString(), 'ether');
 
