@@ -12,6 +12,7 @@
             const statusDiv = document.getElementById("status");
             const connectButton = document.getElementById("connectButton");
             const createPolicyButton = document.getElementById("createPolicyButton");
+            const disconnectButton = document.getElementById("disconnectButton");
 
             connectButton.addEventListener("click", async function () {
                 if (!window.ethereum) {
@@ -29,20 +30,16 @@
                         return;
                     }
 
-                    statusDiv.innerText = `Connecting: ${userAccount}`;
+                    statusDiv.innerText = `Connected: ${userAccount}`;
 
-                    // Sign a message to verify ownership
                     const message = "Confirm wallet connection";
                     const signature = await window.ethereum.request({
                         method: "personal_sign",
                         params: [message, userAccount],
                     });
 
-                    statusDiv.innerText = `Connected: ${userAccount}`;
-
                     console.log("User signature:", signature);
 
-                    // Send to backend for verification
                     const response = await fetch("/connect-wallet", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -66,19 +63,16 @@
                     return;
                 }
 
-                // Get values from input fields
                 const policyName = document.getElementById("policyName").value;
-                const premium = parseFloat(document.getElementById("premium").value); // Convert to number
-                const coverageAmount = parseFloat(document.getElementById("coverageAmount").value); // Convert to number
+                const premium = parseFloat(document.getElementById("premium").value);
+                const coverageAmount = parseFloat(document.getElementById("coverageAmount").value);
 
-                // Validate input fields
                 if (!policyName || isNaN(premium) || isNaN(coverageAmount)) {
                     alert("Please fill in all fields correctly.");
                     return;
                 }
 
                 try {
-                    // Call create-policy API
                     const response = await fetch(`/create-policy`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -99,8 +93,7 @@
                         return;
                     }
 
-                    txData.from = userAccount;  // Ensure the transaction is sent from the connected wallet
-                    // Convert values to hexadecimal format
+                    txData.from = userAccount;
                     txData.value = web3.utils.toHex(txData.value);
                     txData.gas = web3.utils.toHex(txData.gas);
                     txData.maxFeePerGas = web3.utils.toHex(txData.maxFeePerGas);
@@ -108,8 +101,6 @@
 
                     console.log("Data ready to send:", txData);
 
-
-                    // Show MetaMask confirmation with ETH amount
                     const signedTx = await web3.eth.sendTransaction(txData);
 
                     alert(`Transaction sent! TxHash: ${signedTx.transactionHash}`);
@@ -119,14 +110,75 @@
                     alert("Transaction failed. Check console for details.");
                 }
             });
-        });
-        // Function to fetch all policies from the backend API
 
+            disconnectButton.addEventListener("click", async function () {
+                if (!userAccount) {
+                    alert("No wallet is connected.");
+                    return;
+                }
+
+                if (confirm("Are you sure you want to disconnect your wallet and revoke permissions?")) {
+                    try {
+                        await window.ethereum.request({
+                            method: "wallet_revokePermissions",
+                            params: [
+                                {
+                                    eth_accounts: {},
+                                },
+                            ],
+                        });
+
+                        userAccount = null;
+                        web3 = null;
+                        statusDiv.innerText = "Not Connected";
+
+                        alert("Wallet disconnected and permissions revoked. You may need to reconnect manually next time.");
+                    } catch (error) {
+                        console.error("Failed to revoke permissions:", error);
+                        alert("Could not revoke permissions automatically. You can manually remove the site from MetaMask's 'Connected sites' settings.");
+                    }
+                }
+            });
+
+            async function getPolicies() {
+                const response = await fetch("/get-policies", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ address: userAccount }),
+                });
+                const policies = await response.json();
+                console.log("getPolicies calling");
+                if (!userAccount) {
+                    alert("Please connect your wallet first.");
+                    return;
+                }
+
+                let policyList = "";
+                policies.forEach(policy => {
+                    const premiumInEther = Web3.utils.fromWei(policy.premium.toString(), 'ether');
+                    const coverageAmountInEther = Web3.utils.fromWei(policy.coverageAmount.toString(), 'ether');
+
+                    policyList += `
+                        <tr>
+                            <td>${policy.policyName}</td>
+                            <td>${premiumInEther}</td>
+                            <td>${coverageAmountInEther}</td>
+                            <td>${policy.isActive ? "Active" : "Inactive"}</td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById("policyTable").innerHTML = policyList;
+            }
+
+        });
+
+        // Function to fetch all policies from the backend API
         async function getPolicies() {
             const response = await fetch("/get-policies", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ address: userAccount}),
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ address: userAccount }),
             });
             const policies = await response.json();
             console.log("getPolicies calling");
@@ -137,9 +189,7 @@
 
             let policyList = "";
             policies.forEach(policy => {
-                // Convert Wei to Ether for more user-friendly display-
-                // comment next two lines if you wish to show values in Wei
-                //and use policy.premium and policy.coverageAmount in place of premiumInEther and coverageAmountInEther
+                // Convert Wei to Ether for more user-friendly display
                 const premiumInEther = Web3.utils.fromWei(policy.premium.toString(), 'ether');
                 const coverageAmountInEther = Web3.utils.fromWei(policy.coverageAmount.toString(), 'ether');
 
@@ -162,6 +212,7 @@
     <h2>Ethereum Insurance Policy</h2>
     <div id="status">Not Connected</div>
     <button id="connectButton">Connect Wallet</button>
+    <button id="disconnectButton">Disconnect Wallet</button>
 
     <h2>Create Policy</h2>
     <label for="policyName">Policy Name: </label>
@@ -175,7 +226,6 @@
 
     <button id="createPolicyButton">Create Policy</button>
 
-<!--    showing all existing policies-->
     <h2>Existing Policies</h2>
     <button onclick="getPolicies()">Load Policies</button>
     <table border="1">
@@ -188,7 +238,6 @@
             </tr>
         </thead>
         <tbody id="policyTable">
-            <!-- Policies will be listed here -->
         </tbody>
     </table>
 
