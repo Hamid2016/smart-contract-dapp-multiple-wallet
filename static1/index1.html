@@ -136,76 +136,49 @@
                     } catch (error) {
                         console.error("Failed to revoke permissions:", error);
                         alert("Could not revoke permissions automatically. You can manually remove the site from MetaMask's 'Connected sites' settings.");
+                        window.location.reload(); // Force page reload
                     }
                 }
             });
 
-            async function getPolicies() {
-                const response = await fetch("/get-policies", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ address: userAccount }),
-                });
-                const policies = await response.json();
-                console.log("getPolicies calling");
-                if (!userAccount) {
-                    alert("Please connect your wallet first.");
-                    return;
+            // Function to fetch all policies from the backend API
+            window.getPolicies = async function () {
+                try {
+                    const response = await fetch("/get-policies", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ address: userAccount }),
+                    });
+                    const policies = await response.json();
+                    console.log("getPolicies calling");
+                    if (!userAccount) {
+                        alert("Please connect your wallet first.");
+                        return;
+                    }
+
+                    let policyList = "";
+                    policies.forEach(policy => {
+                        // Convert Wei to Ether for more user-friendly display
+                        const premiumInEther = Web3.utils.fromWei(policy.premium.toString(), 'ether');
+                        const coverageAmountInEther = Web3.utils.fromWei(policy.coverageAmount.toString(), 'ether');
+
+                        policyList += `
+                            <tr>
+                                <td>${policy.policyName}</td>
+                                <td>${premiumInEther}</td>
+                                <td>${coverageAmountInEther}</td>
+                                <td>${policy.isActive ? "Active" : "Inactive"}</td>
+                            </tr>
+                        `;
+                    });
+
+                    document.getElementById("policyTable").innerHTML = policyList;
+                } catch(error) {
+                    console.error("Error fetching policies", error);
+                    alert("Error fetching policies, check the console");
                 }
-
-                let policyList = "";
-                policies.forEach(policy => {
-                    const premiumInEther = Web3.utils.fromWei(policy.premium.toString(), 'ether');
-                    const coverageAmountInEther = Web3.utils.fromWei(policy.coverageAmount.toString(), 'ether');
-
-                    policyList += `
-                        <tr>
-                            <td>${policy.policyName}</td>
-                            <td>${premiumInEther}</td>
-                            <td>${coverageAmountInEther}</td>
-                            <td>${policy.isActive ? "Active" : "Inactive"}</td>
-                        </tr>
-                    `;
-                });
-
-                document.getElementById("policyTable").innerHTML = policyList;
             }
-
         });
-
-        // Function to fetch all policies from the backend API
-        async function getPolicies() {
-            const response = await fetch("/get-policies", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ address: userAccount }),
-            });
-            const policies = await response.json();
-            console.log("getPolicies calling");
-            if (!userAccount) {
-                alert("Please connect your wallet first.");
-                return;
-            }
-
-            let policyList = "";
-            policies.forEach(policy => {
-                // Convert Wei to Ether for more user-friendly display
-                const premiumInEther = Web3.utils.fromWei(policy.premium.toString(), 'ether');
-                const coverageAmountInEther = Web3.utils.fromWei(policy.coverageAmount.toString(), 'ether');
-
-                policyList += `
-                    <tr>
-                        <td>${policy.policyName}</td>
-                        <td>${premiumInEther}</td>
-                        <td>${coverageAmountInEther}</td>
-                        <td>${policy.isActive ? "Active" : "Inactive"}</td>
-                    </tr>
-                `;
-            });
-
-            document.getElementById("policyTable").innerHTML = policyList;
-        }
-
     </script>
 </head>
 <body>
@@ -240,6 +213,5 @@
         <tbody id="policyTable">
         </tbody>
     </table>
-
 </body>
 </html>

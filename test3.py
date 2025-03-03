@@ -99,24 +99,28 @@ async def create_policy(data: PolicyData):
 # Function to get all policies
 @app.post("/get-policies")
 async def get_policies(data: GetPolicyData):
-
     try:
         connected_address = data.address
         connected_address = Web3.to_checksum_address(connected_address)
-        # Call the getPolicies function from the smart contract
+        print(f"Calling getPolicies with address: {connected_address}")
         policies = contract.functions.getPolicies().call({"from": connected_address})
+        print(f"Raw contract response: {policies}")
 
-        # Return the policies as a list of dictionaries
-        return [
+        result = [
             {
                 "policyName": policy[0],
-                "premium": policy[1],
-                "coverageAmount": policy[2],
+                # "premium": policy[1],
+                "premium": str(policy[1]),
+                # "coverageAmount": policy[2],
+                "coverageAmount": str(policy[2]),
                 "isActive": policy[3],
             }
             for policy in policies
         ]
+        print(f"Formatted response: {result}")
+        return result
     except Exception as e:
+        print(f"Error in /get-policies: {e}")
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 if __name__ == "__main__":
