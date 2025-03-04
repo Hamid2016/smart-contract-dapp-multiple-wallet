@@ -144,6 +144,8 @@
             // Function to fetch all policies from the backend API
             window.getPolicies = async function () {
                 try {
+                    // Clear the table before loading new data
+                    document.getElementById("policyTable").innerHTML = "";
                     const response = await fetch("/get-policies", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
