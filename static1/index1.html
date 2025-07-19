@@ -83,6 +83,9 @@
                     document.getElementById('walletModal').style.display = 'none';
                     document.getElementById('modalOverlay').style.display = 'none';
 
+                    // Keep button disabled when connected
+                    connectButton.disabled = true;
+
 
                 } catch (error) {
                     statusDiv.textContent = `Error: ${error.message}`;
@@ -148,9 +151,6 @@
 
                     const txData = await response.json();
                     console.log("Unsigned Transaction:", txData);
-<!--                    if (!txData.to) {-->
-<!--                        txData.to = contractAddress; // Fallback to known contract address-->
-<!--                    }-->
 
                     if (!txData.to) {
                         alert("Transaction error: Missing 'to' address.");
@@ -196,6 +196,8 @@
                         userAccount = null;
                         web3 = null;
                         statusDiv.innerText = "Not Connected";
+                        // active button  when disconnected
+                        connectButton.disabled = false;
 
                         alert("Wallet disconnected and permissions revoked. You may need to reconnect manually next time.");
                     } catch (error) {
