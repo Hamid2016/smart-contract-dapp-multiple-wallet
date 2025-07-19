@@ -19,18 +19,6 @@
             const createPolicyButton = document.getElementById("createPolicyButton");
             const disconnectButton = document.getElementById("disconnectButton");
 
-                // Sepolia Testnet Configuration
-<!--                const SEPOLIA_CONFIG = {-->
-<!--                    chainId: '0xaa36a7',-->
-<!--                    chainName: 'Sepolia Testnet',-->
-<!--                    rpcUrls: ['https://rpc.sepolia.org'],-->
-<!--                    nativeCurrency: {-->
-<!--                        name: 'SepoliaETH',-->
-<!--                        symbol: 'ETH',-->
-<!--                        decimals: 18-->
-<!--                    },-->
-<!--                    blockExplorerUrls: ['https://sepolia.etherscan.io']-->
-<!--                };-->
 
                 // Show connection window
                 document.getElementById('connectButton').onclick = function() {
@@ -45,10 +33,7 @@
 
             // Common wallet connection function
             async function connectWallet(walletName) {
-                // if (!window.ethereum) {
-                //     alert("${walletName} is not installed. Please install it to connect your wallet.");
-                //     return;
-                // }
+
                 try {
                     let provider;
                     if (walletName === 'Rabby') {
@@ -82,7 +67,7 @@
                         method: "personal_sign",
                         params: [message, userAccount],
                     });
-                    const address = accounts[0];
+                    // const address = accounts[0];
                     console.log("User signature:", signature);
 
 
@@ -92,10 +77,9 @@
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ address: userAccount, signature: signature }),
                     });
-<!--                    web3 = new Web3(ethereum);-->
                     const data = await response.json();
                     alert(data.message);
-                    statusDiv.textContent = `Connected: ${address}`;
+                    statusDiv.textContent = `Connected: ${userAccount} with Wallet: ${walletName}`;
                     document.getElementById('walletModal').style.display = 'none';
                     document.getElementById('modalOverlay').style.display = 'none';
 
