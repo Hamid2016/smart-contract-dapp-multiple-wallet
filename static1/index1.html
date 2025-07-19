@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <title>Ethereum Insurance</title>
     <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+
+    <!-- Include Web3Modal and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.8/dist/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.8.0/dist/web3.min.js"></script>
     <script>
         let web3;
         let userAccount;
@@ -14,14 +19,54 @@
             const createPolicyButton = document.getElementById("createPolicyButton");
             const disconnectButton = document.getElementById("disconnectButton");
 
-            connectButton.addEventListener("click", async function () {
-                if (!window.ethereum) {
-                    alert("MetaMask is not installed. Please install it to connect your wallet.");
-                    return;
-                }
+                // Sepolia Testnet Configuration
+<!--                const SEPOLIA_CONFIG = {-->
+<!--                    chainId: '0xaa36a7',-->
+<!--                    chainName: 'Sepolia Testnet',-->
+<!--                    rpcUrls: ['https://rpc.sepolia.org'],-->
+<!--                    nativeCurrency: {-->
+<!--                        name: 'SepoliaETH',-->
+<!--                        symbol: 'ETH',-->
+<!--                        decimals: 18-->
+<!--                    },-->
+<!--                    blockExplorerUrls: ['https://sepolia.etherscan.io']-->
+<!--                };-->
 
+                // Show connection window
+                document.getElementById('connectButton').onclick = function() {
+                    document.getElementById('walletModal').style.display = 'block';
+                    document.getElementById('modalOverlay').style.display = 'block';
+                };
+                // Close modal when clicking outside
+                document.getElementById('modalOverlay').onclick = function() {
+                    document.getElementById('walletModal').style.display = 'none';
+                    document.getElementById('modalOverlay').style.display = 'none';
+                };
+
+            // Common wallet connection function
+            async function connectWallet(walletName) {
+                // if (!window.ethereum) {
+                //     alert("${walletName} is not installed. Please install it to connect your wallet.");
+                //     return;
+                // }
                 try {
-                    web3 = new Web3(window.ethereum);
+                    let provider;
+                    if (walletName === 'Rabby') {
+                        provider = window.rabby?.ethereum || window.ethereum?.providers?.find(p => p.isRabby) || window.ethereum;
+                        if (!provider?.isRabby && !window.rabby) {
+                            alert("Rabby Wallet not detected. Please install it and refresh the page.");
+                            return;
+                        }
+                    }
+                    else if (walletName === 'MetaMask') {
+                        provider = window.ethereum?.providers?.find(p => p.isMetaMask) || window.ethereum;
+                        if (!provider?.isMetaMask) {
+                            alert("MetaMask not detected. Please install it first.");
+                            return;
+                        }
+                    }
+                    web3 = new Web3(provider);
+                    // web3 = new Web3(window.ethereum);
                     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
                     userAccount = accounts[0];
 
@@ -37,22 +82,47 @@
                         method: "personal_sign",
                         params: [message, userAccount],
                     });
-
+                    const address = accounts[0];
                     console.log("User signature:", signature);
 
+
+                    // Connect to backend
                     const response = await fetch("/connect-wallet", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ address: userAccount, signature: signature }),
                     });
-
+<!--                    web3 = new Web3(ethereum);-->
                     const data = await response.json();
                     alert(data.message);
+                    statusDiv.textContent = `Connected: ${address}`;
+                    document.getElementById('walletModal').style.display = 'none';
+                    document.getElementById('modalOverlay').style.display = 'none';
+
 
                 } catch (error) {
-                    console.error("Connection failed:", error);
-                    statusDiv.innerText = "Error connecting to MetaMask.";
+                    statusDiv.textContent = `Error: ${error.message}`;
+                    document.getElementById('walletModal').style.display = 'none';
+                    document.getElementById('modalOverlay').style.display = 'none';
                 }
+            }
+
+            // Rabby Wallet Connection
+            document.getElementById('rabbyButton').addEventListener('click', async () => {
+                // if (!window.ethereum?.isRabby) {
+                //     statusDiv.textContent = 'Rabby Wallet not installed';
+                //     return;
+                // }
+                await connectWallet('Rabby');
+            });
+
+            // MetaMask Connection
+            document.getElementById('metamaskButton').addEventListener('click', async () => {
+                // if (!window.ethereum?.isMetaMask) {
+                //     statusDiv.textContent = 'MetaMask not installed';
+                //     return;
+                // }
+                await connectWallet('MetaMask');
             });
 
             createPolicyButton.addEventListener("click", async function () {
@@ -73,6 +143,14 @@
                 }
 
                 try {
+                    <!--        get current chain id  and change if need      -->
+                    const chainId = await web3.eth.getChainId();
+                    if (chainId !== 11155111) { // Sepolia chain ID
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0xaa36a7' }] // Sepolia in hex
+                        });
+                    }
                     const response = await fetch(`/create-policy`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -86,6 +164,9 @@
 
                     const txData = await response.json();
                     console.log("Unsigned Transaction:", txData);
+<!--                    if (!txData.to) {-->
+<!--                        txData.to = contractAddress; // Fallback to known contract address-->
+<!--                    }-->
 
                     if (!txData.to) {
                         alert("Transaction error: Missing 'to' address.");
@@ -161,8 +242,8 @@
                     let policyList = "";
                     policies.forEach(policy => {
                         // Convert Wei to Ether for more user-friendly display
-                        const premiumInEther = Web3.utils.fromWei(policy.premium.toString(), 'ether');
-                        const coverageAmountInEther = Web3.utils.fromWei(policy.coverageAmount.toString(), 'ether');
+                        const premiumInEther = web3.utils.fromWei(policy.premium.toString(), 'ether');
+                        const coverageAmountInEther = web3.utils.fromWei(policy.coverageAmount.toString(), 'ether');
 
                         policyList += `
                             <tr>
@@ -187,6 +268,19 @@
     <h2>Ethereum Insurance Policy</h2>
     <div id="status">Not Connected</div>
     <button id="connectButton">Connect Wallet</button>
+<!-- The popup (hidden by default) -->
+<!-- Popup Container -->
+<div id="walletModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; z-index: 1000;">
+  <h3>Select Wallet</h3>
+  <button id="metamaskButton" class="wallet-option">MetaMask</button>
+  <button id="rabbyButton" class="wallet-option">rabbyButton Wallet</button>
+</div>
+
+<div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+
+
+<!--    end of that-->
+
     <button id="disconnectButton">Disconnect Wallet</button>
 
     <h2>Create Policy</h2>

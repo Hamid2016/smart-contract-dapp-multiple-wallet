@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.13 (connect-wallet)" project-jdk-type="Python SDK" />
+  <component name="Black">
+    <option name="sdkName" value="Python 3.13 (connect-wallet)" />
+  </component>
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.13 virtualenv at G:\DevOps\blochchain\smartcontract\API3 backend\connect-wallet\.venv" project-jdk-type="Python SDK" />
 </project>

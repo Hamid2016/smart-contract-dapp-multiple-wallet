@@ -15,6 +15,7 @@ app = FastAPI()
 # Initialize Web3
 web3 = Web3(HTTPProvider(os.getenv("ALCHEMY_URL")))
 
+
 # Verify connection
 if not web3.is_connected():
     raise ConnectionError("Failed to connect to Ethereum network")
@@ -82,6 +83,7 @@ async def create_policy(data: PolicyData):
             premium_wei,
             coverage_wei
         ).build_transaction({
+            # 'to': contract_address,
             'chainId': web3.eth.chain_id,
             'from': connected_address,
             'nonce': web3.eth.get_transaction_count(connected_address),
@@ -91,8 +93,12 @@ async def create_policy(data: PolicyData):
             'value': premium_wei  # This adds ETH transfer to the transaction
         })
 
-        return unsigned_tx
-
+        # return unsigned_tx
+        # Return complete transaction data including 'to'
+        return {
+            **unsigned_tx,
+            'to': contract_address  # Explicitly include contract address
+        }
     except Exception as e:
         raise HTTPException(500, detail=f"Error: {str(e)}")
 
