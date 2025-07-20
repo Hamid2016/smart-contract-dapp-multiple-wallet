@@ -34,6 +34,10 @@
 
                     // web3 = new Web3(provider);
                     // web3 = null;//empty default wallet
+                    // Check if any Ethereum wallet is installed
+                    if (!window.ethereum) {
+                        alert("No wallet installed.");
+                    }
                     web3 = new Web3(window.ethereum);
                     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
                     userAccount = accounts[0];
