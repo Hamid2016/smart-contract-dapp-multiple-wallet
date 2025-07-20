@@ -21,37 +21,20 @@
 
 
                 // Show connection window
-                document.getElementById('connectButton').onclick = function() {
-                    document.getElementById('walletModal').style.display = 'block';
-                    document.getElementById('modalOverlay').style.display = 'block';
+                document.getElementById('connectButton').onclick = async function () {
+                    await connectWallet();
                 };
-                // Close modal when clicking outside
-                document.getElementById('modalOverlay').onclick = function() {
-                    document.getElementById('walletModal').style.display = 'none';
-                    document.getElementById('modalOverlay').style.display = 'none';
-                };
+
 
             // Common wallet connection function
-            async function connectWallet(walletName) {
+            // async function connectWallet(walletName) {
+            async function connectWallet() {
 
                 try {
-                    let provider;
-                    if (walletName === 'Rabby') {
-                        provider = window.rabby?.ethereum || window.ethereum?.providers?.find(p => p.isRabby) || window.ethereum;
-                        if (!provider?.isRabby && !window.rabby) {
-                            alert("Rabby Wallet not detected. Please install it and refresh the page.");
-                            return;
-                        }
-                    }
-                    else if (walletName === 'MetaMask') {
-                        provider = window.ethereum?.providers?.find(p => p.isMetaMask) || window.ethereum;
-                        if (!provider?.isMetaMask) {
-                            alert("MetaMask not detected. Please install it first.");
-                            return;
-                        }
-                    }
-                    web3 = new Web3(provider);
-                    // web3 = new Web3(window.ethereum);
+
+                    // web3 = new Web3(provider);
+                    // web3 = null;//empty default wallet
+                    web3 = new Web3(window.ethereum);
                     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
                     userAccount = accounts[0];
 
@@ -60,7 +43,7 @@
                         return;
                     }
 
-                    statusDiv.innerText = `Connected: ${userAccount}`;
+                    statusDiv.innerText = `Connecting: ${userAccount}`;
 
                     const message = "Confirm wallet connection";
                     const signature = await window.ethereum.request({
@@ -79,9 +62,8 @@
                     });
                     const data = await response.json();
                     alert(data.message);
-                    statusDiv.textContent = `Connected: ${userAccount} with Wallet: ${walletName}`;
-                    document.getElementById('walletModal').style.display = 'none';
-                    document.getElementById('modalOverlay').style.display = 'none';
+                    // statusDiv.textContent = `Connected: ${userAccount} with Wallet: ${walletName}`;
+                    statusDiv.textContent = `Connected: ${userAccount}`;
 
                     // Keep button disabled when connected
                     connectButton.disabled = true;
@@ -89,28 +71,10 @@
 
                 } catch (error) {
                     statusDiv.textContent = `Error: ${error.message}`;
-                    document.getElementById('walletModal').style.display = 'none';
-                    document.getElementById('modalOverlay').style.display = 'none';
+
                 }
             }
 
-            // Rabby Wallet Connection
-            document.getElementById('rabbyButton').addEventListener('click', async () => {
-                // if (!window.ethereum?.isRabby) {
-                //     statusDiv.textContent = 'Rabby Wallet not installed';
-                //     return;
-                // }
-                await connectWallet('Rabby');
-            });
-
-            // MetaMask Connection
-            document.getElementById('metamaskButton').addEventListener('click', async () => {
-                // if (!window.ethereum?.isMetaMask) {
-                //     statusDiv.textContent = 'MetaMask not installed';
-                //     return;
-                // }
-                await connectWallet('MetaMask');
-            });
 
             createPolicyButton.addEventListener("click", async function () {
                 console.log("Start create policy");
@@ -254,18 +218,7 @@
     <h2>Ethereum Insurance Policy</h2>
     <div id="status">Not Connected</div>
     <button id="connectButton">Connect Wallet</button>
-<!-- The popup (hidden by default) -->
-<!-- Popup Container -->
-<div id="walletModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; z-index: 1000;">
-  <h3>Select Wallet</h3>
-  <button id="metamaskButton" class="wallet-option">MetaMask</button>
-  <button id="rabbyButton" class="wallet-option">rabbyButton Wallet</button>
-</div>
 
-<div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;"></div>
-
-
-<!--    end of that-->
 
     <button id="disconnectButton">Disconnect Wallet</button>
 
