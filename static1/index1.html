@@ -18,7 +18,7 @@
             const connectButton = document.getElementById("connectButton");
             const createPolicyButton = document.getElementById("createPolicyButton");
             const disconnectButton = document.getElementById("disconnectButton");
-
+            const coverageAmount=document.getElementById('coverageAmount')
 
                 // Show connection window
                 document.getElementById('connectButton').onclick = async function () {
@@ -235,7 +235,12 @@
 
     <label for="coverageAmount">Coverage Amount (ETH): </label>
     <input type="number" id="coverageAmount" required step="0.01"><br><br>
-
+    <div style="text-align: center;">
+    <label for="policyCheck" id="policyLabel">
+      تعهد جبران خسارت بدنه ماشین ناشی از تصادف تا سقف _____ ریال است. جهت خرید، لطفاً تیک را فعال کنید
+    </label>
+      <input type="checkbox" id="policyCheck">
+    </div>
     <button id="createPolicyButton">Create Policy</button>
 
     <h2>Existing Policies</h2>
