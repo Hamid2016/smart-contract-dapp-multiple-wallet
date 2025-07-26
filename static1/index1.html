@@ -238,7 +238,7 @@
     <br><br>
 
     <label for="coverageAmount">Coverage Amount (ETH): </label>
-    <input type="number" id="coverageAmount" required step="0.01"><br><br>
+    <input type="number" id="coverageAmount" min="50000000" max="1000000000" step="0.01" required placeholder="50M–1B"   oninput="validateRange(this)">    <br><br>
     <div style="text-align: center;">
 
         <label for="policyCheck" id="policyLabel">
@@ -262,7 +262,13 @@
         <tbody id="policyTable">
         </tbody>
     </table>
-
+    <script>
+        function validateRange(input) {
+            const value = parseFloat(input.value);
+            if (value < 50000000) input.value = 50000000;
+            if (value > 1000000000) input.value = 1000000000;
+        }
+    </script>
     <script>
         //function for getting value of coverageAmount
         document.addEventListener("DOMContentLoaded", function() {
