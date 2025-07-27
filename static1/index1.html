@@ -187,11 +187,6 @@
             });
 
             disconnectButton.addEventListener("click", async function () {
-                if (!userAccount) {
-                    alert("No wallet is connected.");
-                    return;
-                }
-
                 if (confirm("Are you sure you want to disconnect your wallet and revoke permissions?")) {
                     try {
                         await window.ethereum.request({
