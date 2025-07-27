@@ -3,12 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <title>Ethereum Insurance</title>
+
+</head>
+<body>
+    <h2>Ethereum Insurance Policy</h2>
+    <div id="status">Not Connected</div>
+    <button id="connectButton">Connect Wallet</button>
+
+
+    <button id="disconnectButton">Disconnect Wallet</button>
+
+    <h2>Create Policy</h2>
+    <label for="policyName">Policy Name: </label>
+    <input type="text" id="policyName" required><br><br>
+
+    <label for="premium">Premium (ETH): </label>
+    <input type="number" id="premium" required step="0.01">
+
+    <br><br>
+
+    <label for="coverageAmount">Coverage Amount (IRR): </label>
+    <input type="number" id="coverageAmount" min="50000000" max="1000000000" step="10000000" required placeholder="50M–1B"   oninput="validateRange(this)">    <br><br>
+    <div style="text-align: center;">
+
+        <label for="policyCheck" id="policyLabel">
+          تعهد جبران خسارت بدنه ماشین ناشی از تصادف تا سقف 0 ریال است. جهت خرید، لطفاً تیک را فعال کنید
+        </label>
+        <input type="checkbox" id="policyCheck">
+    </div>
+    <button id="createPolicyButton" disabled>Create Policy</button>
+
+    <h2>Existing Policies</h2>
+    <button onclick="getPolicies()">Load Policies</button>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Policy Name</th>
+                <th>Premium</th>
+                <th>Coverage Amount</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="policyTable">
+        </tbody>
+    </table>
     <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
 
-    <!-- Include Web3Modal and dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.8/dist/index.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.8.0/dist/web3.min.js"></script>
+
     <script>
         let web3;
         let userAccount;
@@ -219,49 +260,6 @@
 
     </script>
 
-</head>
-<body>
-    <h2>Ethereum Insurance Policy</h2>
-    <div id="status">Not Connected</div>
-    <button id="connectButton">Connect Wallet</button>
-
-
-    <button id="disconnectButton">Disconnect Wallet</button>
-
-    <h2>Create Policy</h2>
-    <label for="policyName">Policy Name: </label>
-    <input type="text" id="policyName" required><br><br>
-
-    <label for="premium">Premium (ETH): </label>
-    <input type="number" id="premium" required step="0.01">
-
-    <br><br>
-
-    <label for="coverageAmount">Coverage Amount (IRR): </label>
-    <input type="number" id="coverageAmount" min="50000000" max="1000000000" step="10000000" required placeholder="50M–1B"   oninput="validateRange(this)">    <br><br>
-    <div style="text-align: center;">
-
-        <label for="policyCheck" id="policyLabel">
-          تعهد جبران خسارت بدنه ماشین ناشی از تصادف تا سقف 0 ریال است. جهت خرید، لطفاً تیک را فعال کنید
-        </label>
-        <input type="checkbox" id="policyCheck">
-    </div>
-    <button id="createPolicyButton" disabled>Create Policy</button>
-
-    <h2>Existing Policies</h2>
-    <button onclick="getPolicies()">Load Policies</button>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Policy Name</th>
-                <th>Premium</th>
-                <th>Coverage Amount</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody id="policyTable">
-        </tbody>
-    </table>
     <script>
         document.getElementById('policyCheck').addEventListener('change', function() {
         document.getElementById('createPolicyButton').disabled = !this.checked;
