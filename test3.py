@@ -5,12 +5,16 @@ from dotenv import load_dotenv
 from web3 import Web3, HTTPProvider
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
+from fastapi.staticfiles import StaticFiles
 
 # Load environment variables
 load_dotenv()
 
 # Initialize FastAPI
 app = FastAPI()
+
+# Add this to serve static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Initialize Web3
 web3 = Web3(HTTPProvider(os.getenv("ALCHEMY_URL")))
@@ -43,7 +47,7 @@ class GetPolicyData(BaseModel):
 # Route to serve the frontend
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
-    with open("static1/index1.html", "r" , encoding="utf-8") as file:
+    with open("static/index.html", "r" , encoding="utf-8") as file:
         html_content = file.read()
     return HTMLResponse(content=html_content, status_code=200)
 
