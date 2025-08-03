@@ -6,6 +6,20 @@ from web3 import Web3, HTTPProvider
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
+import aiofiles
+from datetime import datetime, timezone
+
+
+
+LOG_DIR = "logs"
+LOG_FILE = os.path.join(LOG_DIR, "frontend-logs.txt")
+
+# Get full absolute path
+log_path = os.path.abspath(LOG_FILE)
+print("🧭 Final log path:", log_path)
+
+# Create directory if it doesn't exist
+os.makedirs(LOG_DIR, exist_ok=True)
 
 # Load environment variables
 load_dotenv()
@@ -43,6 +57,23 @@ class PolicyData(BaseModel):
 
 class GetPolicyData(BaseModel):
     address: str
+
+# Data model for frontend log entries
+class FrontendLog(BaseModel):
+    event: str
+    message: str
+
+@app.post("/frontend-log")
+async def log_frontend_event(entry: FrontendLog):
+    timestamp = datetime.now(timezone.utc).isoformat()
+    log_line = f"{timestamp} [{entry.event}] {entry.message}\n"
+
+    try:
+        async with aiofiles.open(LOG_FILE, mode="a") as f:
+            await f.write(log_line)
+        return {"status": "success", "alert": entry.message}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Logging failed: {str(e)}")
 
 # Route to serve the frontend
 @app.get("/", response_class=HTMLResponse)

@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             if (!window.ethereum) {
                 alert("No wallet installed.");
+                logToBackend("WALLET_CHECK", "No wallet installed.");
                 return;
             }
             web3 = new Web3(window.ethereum);
@@ -24,7 +25,8 @@ document.addEventListener("DOMContentLoaded", function () {
             userAccount = accounts[0];
 
             if (!userAccount) {
-                alert("Failed to connect wallet.");
+                alert("Please connect your wallet first.");
+                logToBackend("WALLET_ERROR", "Please connect your wallet first.");
                 return;
             }
 
@@ -44,14 +46,17 @@ document.addEventListener("DOMContentLoaded", function () {
             alert(data.message);
             statusDiv.textContent = `Connected: ${userAccount}`;
             connectButton.disabled = true;
+            logToBackend("WALLET_CONNECTED", userAccount);
         } catch (error) {
             statusDiv.textContent = `Error: ${error.message}`;
+            logToBackend("WALLET_CONNECTION_ERROR", error.message);
         }
     }
 
     createPolicyButton.addEventListener("click", async function () {
         if (!userAccount) {
             alert("Please connect your wallet first.");
+            logToBackend("WALLET_ERROR", "Please connect your wallet first.");
             return;
         }
 
@@ -61,6 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!policyName || isNaN(premium) || isNaN(coverageAmount)) {
             alert("Please fill in all fields correctly.");
+            logToBackend("FILL_ALL_FIEILDS", "Please fill in all fields correctly.");
             return;
         }
 
@@ -88,6 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!txData.to) {
                 alert("Transaction error: Missing 'to' address.");
                 console.error("Transaction data missing 'to' field:", txData);
+                logToBackend("TRANSACTION_MISSING_TO", "No to address");
                 return;
             }
 
@@ -98,10 +105,13 @@ document.addEventListener("DOMContentLoaded", function () {
             txData.maxPriorityFeePerGas = web3.utils.toHex(txData.maxPriorityFeePerGas);
 
             const signedTx = await web3.eth.sendTransaction(txData);
+            console.log("Transaction result:", signedTx);
             alert(`Transaction sent! TxHash: ${signedTx.transactionHash}`);
+            logToBackend("TRANSACTION_SENT", `Hash is ${signedTx.transactionHash}`);
         } catch (error) {
             console.error("Transaction failed:", error);
             alert("Transaction failed. Check console for details.");
+            logToBackend("TRANSACTION_FAILED",`Error is ${error}`)
         }
     });
 
@@ -119,9 +129,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 connectButton.disabled = false;
 
                 alert("Wallet disconnected. You may need to reconnect manually next time.");
+                logToBackend("WALLET_DISCONNECTED", "You may need to reconnect manually next time. ");
+
             } catch (error) {
                 console.error("Failed to revoke permissions:", error);
                 alert("Could not revoke permissions automatically.");
+                logToBackend("REVOKE_PERMISSION_ERROR","Could not revoke permissions")
                 window.location.reload();
             }
         }
@@ -139,6 +152,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (!userAccount) {
                 alert("Please connect your wallet first.");
+                logToBackend("WALLET_CHECK", "No wallet installed.");
                 return;
             }
 
@@ -157,9 +171,11 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             document.getElementById("policyTable").innerHTML = policyList;
+            logToBackend("GET_POLICY","Response 200")
         } catch (error) {
             console.error("Error fetching policies", error);
             alert("Error fetching policies");
+            logToBackend("ERROR_POLICIES","Error fetching policies")
         }
     };
 });
@@ -186,3 +202,20 @@ document.addEventListener("DOMContentLoaded", function() {
         label.textContent = `تعهد جبران خسارت بدنه ماشین ناشی از تصادف تا سقف ${value} ریال است. جهت خرید، لطفاً تیک را فعال کنید`;
     });
 });
+
+
+function logToBackend(eventType, message) {
+    fetch("/frontend-log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            event: eventType,
+            message: message
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log("Log response:", data.status); // Optional for debugging
+    })
+    .catch(err => console.error("Log failed:", err));
+}
