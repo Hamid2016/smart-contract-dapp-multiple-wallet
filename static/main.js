@@ -166,6 +166,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <td>${premiumInEther}</td>
                         <td>${coverageAmountInEther}</td>
                         <td>${policy.isActive ? "Active" : "Inactive"}</td>
+                        <td>Claim</td>
                     </tr>
                 `;
             });
