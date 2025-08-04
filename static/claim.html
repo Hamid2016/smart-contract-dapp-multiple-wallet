@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Claim Policy</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<h2>Policy Claim Form</h2>
+
+<div>
+    <p><strong>Policy Name:</strong> <span id="policyName"></span></p>
+    <p><strong>Coverage Amount:</strong> <span id="coverageAmount"></span></p>
+    <p><strong>Premium:</strong> <span id="premiumAmount"></span></p>
+    <p><strong>Status:</strong> <span id="policyStatus"></span></p>
+</div>
+
+<hr>
+
+<form>
+    <p>Incident Location: <input type="text" id="location"></p>
+    <p>Claim Amount: <input type="text" id="amount"></p>
+    <p>Documents: <input type="file" id="docs"></p>
+    <button type="button" onclick="submitClaim()">Submit Claim</button>
+</form>
+
+<script>
+    // Get parameters from URL
+    const params = new URLSearchParams(window.location.search);
+
+    // Display policy info
+    document.getElementById('policyName').textContent = decodeURIComponent(params.get('name'));
+    document.getElementById('coverageAmount').textContent = decodeURIComponent(params.get('coverage'));
+    document.getElementById('premiumAmount').textContent = decodeURIComponent(params.get('premium'));
+    document.getElementById('policyStatus').textContent = decodeURIComponent(params.get('status'));
+
+    function submitClaim() {
+        const policyName = decodeURIComponent(params.get('name'));
+        alert(`Claim submitted for ${policyName}`);
+        // Add actual submission logic here
+    }
+</script>
+
+</body>
+</html>

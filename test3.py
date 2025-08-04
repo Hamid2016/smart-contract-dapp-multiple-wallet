@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 import os
 import json
 from dotenv import load_dotenv
+from starlette.responses import RedirectResponse
 from web3 import Web3, HTTPProvider
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
@@ -63,6 +64,20 @@ class FrontendLog(BaseModel):
     event: str
     message: str
 
+# open up a new tab one ckiam click
+@app.get("/claim/{policy_name}")
+async def claim_redirect(
+    policy_name: str,
+    coverage: str,
+    premium: str,
+    status: bool
+):
+    return RedirectResponse(
+        f"/static/claim.html?name={policy_name}" +
+        f"&coverage={coverage}" +
+        f"&premium={premium}" +
+        f"&status={'Active' if status else 'Inactive'}"
+    )
 @app.post("/frontend-log")
 async def log_frontend_event(entry: FrontendLog):
     timestamp = datetime.now(timezone.utc).isoformat()

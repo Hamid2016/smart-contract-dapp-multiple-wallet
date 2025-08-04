@@ -166,7 +166,19 @@ document.addEventListener("DOMContentLoaded", function () {
                         <td>${premiumInEther}</td>
                         <td>${coverageAmountInEther}</td>
                         <td>${policy.isActive ? "Active" : "Inactive"}</td>
-                        <td>Claim</td>
+<!--                        <td><a href="/claim/${policy.policyName}" target="_blank">Claim</a></td>-->
+                        <td>
+                            <a href="/claim/${encodeURIComponent(policy.policyName)}?coverage=${encodeURIComponent(coverageAmountInEther)}&premium=${encodeURIComponent(premiumInEther)}&status=${policy.isActive}" 
+                               target="_blank">
+                               Claim
+                            </a>
+                        </td>                       
+<!--                        // <td>-->
+<!--                        //     <a href="/claim/${encodeURIComponent(policy.policyName)}" -->
+<!--                        //        target="_blank">-->
+<!--                        //        Claim-->
+<!--                        //     </a>-->
+<!--                        // </td>-->
                     </tr>
                 `;
             });
@@ -220,3 +232,5 @@ function logToBackend(eventType, message) {
     })
     .catch(err => console.error("Log failed:", err));
 }
+
+
