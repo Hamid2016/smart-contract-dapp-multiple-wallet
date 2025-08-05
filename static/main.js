@@ -172,13 +172,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                target="_blank">
                                Claim
                             </a>
-                        </td>                       
-<!--                        // <td>-->
-<!--                        //     <a href="/claim/${encodeURIComponent(policy.policyName)}" -->
-<!--                        //        target="_blank">-->
-<!--                        //        Claim-->
-<!--                        //     </a>-->
-<!--                        // </td>-->
+                        </td>
                     </tr>
                 `;
             });
