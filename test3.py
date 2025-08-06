@@ -96,7 +96,7 @@ async def claim_redirect(
 
 
 # Step 2: Add an endpoint to fetch policy data
-@app.get("/get-policy-data")
+@app.post("/get-policy-data")
 async def get_policy_data(request: Request):
     policy_data = request.cookies.get("policy_data")
     if not policy_data:

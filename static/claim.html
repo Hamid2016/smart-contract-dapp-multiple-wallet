@@ -29,8 +29,13 @@
     // Fetch policy data securely from backend
     async function loadPolicyData() {
         try {
-            const response = await fetch("/get-policy-data", {
-                credentials: 'include'  // Required for cookies
+                const response = await fetch("/get-policy-data", {
+                method: "POST",  // 👈 Changed from GET to POST
+                credentials: "include",  // Still required for cookies
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({}),  // Empty body (or add data if needed)
             });
 
             if (response.ok) {
