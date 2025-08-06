@@ -9,6 +9,8 @@ from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 import aiofiles
 from datetime import datetime, timezone
+from fastapi import Request, Response
+from fastapi.responses import RedirectResponse, JSONResponse
 
 
 
@@ -65,19 +67,42 @@ class FrontendLog(BaseModel):
     message: str
 
 # open up a new tab one ckiam click
+# Step 1: Store policy data in a secure cookie
 @app.get("/claim/{policy_name}")
 async def claim_redirect(
-    policy_name: str,
-    coverage: str,
-    premium: str,
-    status: bool
+        request: Request,
+        policy_name: str,
+        coverage: str,
+        premium: str,
+        status: bool
 ):
-    return RedirectResponse(
-        f"/static/claim.html?name={policy_name}" +
-        f"&coverage={coverage}" +
-        f"&premium={premium}" +
-        f"&status={'Active' if status else 'Inactive'}"
+    response = RedirectResponse(url="/static/claim.html")
+
+    # Store data in a secure HTTP-only cookie
+    response.set_cookie(
+        key="policy_data",
+        value=json.dumps({
+            "name": policy_name,
+            "coverage": coverage,
+            "premium": premium,
+            "status": status
+        }),
+        httponly=True,  # Prevents JavaScript access
+        secure=True,  # Only send over HTTPS
+        samesite="lax"  # Basic CSRF protection
     )
+
+    return response
+
+
+# Step 2: Add an endpoint to fetch policy data
+@app.get("/get-policy-data")
+async def get_policy_data(request: Request):
+    policy_data = request.cookies.get("policy_data")
+    if not policy_data:
+        raise HTTPException(status_code=404, detail="Policy data not found")
+
+    return JSONResponse(json.loads(policy_data))
 @app.post("/frontend-log")
 async def log_frontend_event(entry: FrontendLog):
     timestamp = datetime.now(timezone.utc).isoformat()

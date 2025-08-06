@@ -2,7 +2,6 @@
 <html>
 <head>
     <title>Claim Policy</title>
-    <meta charset="UTF-8">
 </head>
 <body>
 
@@ -27,18 +26,34 @@
 </form>
 
 <script>
-    // Get parameters from URL
-    const params = new URLSearchParams(window.location.search);
+    // Fetch policy data securely from backend
+    async function loadPolicyData() {
+        try {
+            const response = await fetch("/get-policy-data", {
+                credentials: 'include'  // Required for cookies
+            });
 
-    // Display policy info
-    document.getElementById('policyName').textContent = decodeURIComponent(params.get('name'));
-    document.getElementById('coverageAmount').textContent = decodeURIComponent(params.get('coverage'));
-    document.getElementById('premiumAmount').textContent = decodeURIComponent(params.get('premium'));
-    document.getElementById('policyStatus').textContent = decodeURIComponent(params.get('status'));
+            if (response.ok) {
+                const data = await response.json();
+
+                // Display policy info
+                document.getElementById('policyName').textContent = data.name;
+                document.getElementById('coverageAmount').textContent = data.coverage;
+                document.getElementById('premiumAmount').textContent = data.premium;
+                document.getElementById('policyStatus').textContent = data.status ? "Active" : "Inactive";
+            } else {
+                console.error("Failed to load policy data");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    }
+
+    // Load data when page opens
+    loadPolicyData();
 
     function submitClaim() {
-        const policyName = decodeURIComponent(params.get('name'));
-        alert(`Claim submitted for ${policyName}`);
+        alert("Claim submitted!");
         // Add actual submission logic here
     }
 </script>
