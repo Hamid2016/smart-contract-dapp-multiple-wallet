@@ -17,11 +17,17 @@
 <hr>
 
 <form>
-    <p>Location: <input type="text" id="location"></p>
-    <p>Description: <input type="text" id="description"></p>
+    <p>Location:
+      <input type="text" id="location" placeholder="Enter address" readonly
+             onclick="window.open('https://www.google.com/maps', '_blank')">
+    </p>    <p>Description: <input type="text" id="description"></p>
     <p>Claim Amount: <input type="text" id="amount"></p>
     <p>Claim Date: <input type="date" id="date"></p>
-    <p>Documents: <input type="file" id="docs"></p>
+    <p>Documents-Front-Right: <input type="file" id="docs1"></p>
+    <p>Documents-Front-Left: <input type="file" id="docs2"></p>
+    <p>Documents-Back-right: <input type="file" id="docs3"></p>
+    <p>Documents-Back-Left: <input type="file" id="docs4"></p>
+<!--    <p>Documents: <input type="file" id="docs" multiple></p>-->
     <button type="button" onclick="submitClaim()">Submit Claim</button>
 </form>
 
