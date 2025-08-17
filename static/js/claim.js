@@ -59,13 +59,26 @@ function openMapModal() {
 
         map.on('click', function(e) {
             const { lat, lng } = e.latlng;
+
             if (marker) {
                 marker.setLatLng(e.latlng);
             } else {
                 marker = L.marker(e.latlng).addTo(map);
             }
-            document.getElementById('location').value = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
-            closeMapModal();
+
+            // 🔍 Reverse geocode to get address
+            fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+                .then(response => response.json())
+                .then(data => {
+                    const address = data.display_name || `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+                    document.getElementById('location').value = address;
+                    closeMapModal();
+                })
+                .catch(error => {
+                    console.error("Reverse geocoding failed:", error);
+                    document.getElementById('location').value = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+                    closeMapModal();
+                });
         });
     }
 }
