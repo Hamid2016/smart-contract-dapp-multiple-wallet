@@ -1,17 +1,41 @@
-    .label {
-        display: inline-block;
-        width: 180px;
-        font-weight: bold;
-    }
+.label {
+    display: inline-block;
+    width: 180px;
+    font-weight: bold;
+}
 
-    input[type="text"],
-    input[type="number"],
-    input[type="date"],
-    input[type="file"] {
-        width: 250px;
-        padding: 6px;
-    }
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="file"] {
+    width: 250px;
+    padding: 6px;
+}
 
-    form p {
-        margin-bottom: 10px;
-    }
+form p {
+    margin-bottom: 10px;
+}
+
+/*for map box*/
+#mapModal {
+  display: none;
+  position: fixed;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  background: white;
+  border: 1px solid #ccc;
+  z-index: 1000;
+}
+
+#map {
+  height: 90%;
+  width: 100%;
+}
+
+#mapModal button {
+  width: 100%;
+  padding: 10px;
+}
+/*end for map box*/

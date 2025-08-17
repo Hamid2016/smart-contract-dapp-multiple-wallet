@@ -4,6 +4,7 @@
     <title>Claim Policy</title>
 
     <link rel="stylesheet" href="css/claim.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
 
 </head>
@@ -22,10 +23,14 @@
 <hr>
 
 <form>
+<!--    <p><span class="label">Location:</span>-->
+<!--        <input type="text" id="location" placeholder="Enter address" readonly-->
+<!--             onclick="window.open('https://www.google.com/maps', '_blank')">-->
+<!--    </p>-->
     <p><span class="label">Location:</span>
-        <input type="text" id="location" placeholder="Enter address" readonly
-             onclick="window.open('https://www.google.com/maps', '_blank')">
+    <input type="text" id="location" placeholder="Click to choose location" readonly onclick="openMapModal()">
     </p>
+
     <p><span class="label">Description:</span> <input type="text" id="description"></p>
     <p><span class="label">Claim Amount:</span> <input type="number" id="amount" oninput="validateClaimAmount(this)"></p>
     <p id="claimWarning" style="color: red; display: none;">Claim amount cannot exceed coverage amount.</p>
@@ -38,7 +43,13 @@
 </form>
 
 
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="js/claim.js"></script>
+<!-- Map Modal -->
+<div id="mapModal" style="display:none; position:fixed; top:10%; left:10%; width:80%; height:80%; background:white; border:1px solid #ccc; z-index:1000;">
+    <div style="height:90%; width:100%;" id="map"></div>
+    <button onclick="closeMapModal()" style="width:100%; padding:10px;">Close Map</button>
+</div>
 
 
 </body>
