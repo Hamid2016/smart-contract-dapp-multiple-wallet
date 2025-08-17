@@ -62,3 +62,5 @@ websockets==13.1
 win32_setctime==1.2.0
 WMI==1.5.1
 yarl==1.18.3
+
+aiofiles~=24.1.0
