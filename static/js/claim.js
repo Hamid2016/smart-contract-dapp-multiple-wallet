@@ -72,12 +72,12 @@ function openMapModal() {
                 .then(data => {
                     const address = data.display_name || `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
                     document.getElementById('location').value = address;
-                    closeMapModal();
+                    // closeMapModal();
                 })
                 .catch(error => {
                     console.error("Reverse geocoding failed:", error);
                     document.getElementById('location').value = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
-                    closeMapModal();
+                    // closeMapModal();
                 });
         });
     }
