@@ -10,6 +10,7 @@
         }
 
         input[type="text"],
+        input[type="number"],
         input[type="date"],
         input[type="file"] {
             width: 250px;
@@ -41,7 +42,8 @@
              onclick="window.open('https://www.google.com/maps', '_blank')">
     </p>
     <p><span class="label">Description:</span> <input type="text" id="description"></p>
-    <p><span class="label">Claim Amount:</span> <input type="text" id="amount"></p>
+    <p><span class="label">Claim Amount:</span> <input type="number" id="amount" oninput="validateClaimAmount(this)"></p>
+    <p id="claimWarning" style="color: red; display: none;">Claim amount cannot exceed coverage amount.</p>
     <p><span class="label">Claim Date:</span> <input type="date" id="date"></p>
     <p><span class="label">Documents-Front-Right:</span> <input type="file" id="docs1"></p>
     <p><span class="label">Documents-Front-Left:</span> <input type="file" id="docs2"></p>
@@ -83,6 +85,20 @@
     // Load data when page opens
     loadPolicyData();
 
+    //function to not allow claim amount exceed amount coverage amount
+    function validateClaimAmount(input) {
+        const coverage = parseFloat(document.getElementById("coverageAmount").textContent);
+        const claim = parseFloat(input.value);
+        const warning = document.getElementById("claimWarning");
+
+        if (!isNaN(claim) && claim > coverage) {
+            input.value = coverage;
+            warning.style.display = "block";
+        } else {
+            warning.style.display = "none";
+        }
+    }
+    //claim button
     function submitClaim() {
         alert("Claim submitted!");
         // Add actual submission logic here
