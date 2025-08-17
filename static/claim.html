@@ -2,7 +2,26 @@
 <html>
 <head>
     <title>Claim Policy</title>
+    <style>
+        .label {
+            display: inline-block;
+            width: 180px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="file"] {
+            width: 250px;
+            padding: 6px;
+        }
+
+        form p {
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
+
 <body>
 
 <h2>Policy Claim Form</h2>
@@ -17,19 +36,20 @@
 <hr>
 
 <form>
-    <p>Location:
-      <input type="text" id="location" placeholder="Enter address" readonly
+    <p><span class="label">Location:</span>
+        <input type="text" id="location" placeholder="Enter address" readonly
              onclick="window.open('https://www.google.com/maps', '_blank')">
-    </p>    <p>Description: <input type="text" id="description"></p>
-    <p>Claim Amount: <input type="text" id="amount"></p>
-    <p>Claim Date: <input type="date" id="date"></p>
-    <p>Documents-Front-Right: <input type="file" id="docs1"></p>
-    <p>Documents-Front-Left: <input type="file" id="docs2"></p>
-    <p>Documents-Back-Right: <input type="file" id="docs3"></p>
-    <p>Documents-Back-Left: <input type="file" id="docs4"></p>
-<!--    <p>Documents: <input type="file" id="docs" multiple></p>-->
+    </p>
+    <p><span class="label">Description:</span> <input type="text" id="description"></p>
+    <p><span class="label">Claim Amount:</span> <input type="text" id="amount"></p>
+    <p><span class="label">Claim Date:</span> <input type="date" id="date"></p>
+    <p><span class="label">Documents-Front-Right:</span> <input type="file" id="docs1"></p>
+    <p><span class="label">Documents-Front-Left:</span> <input type="file" id="docs2"></p>
+    <p><span class="label">Documents-Back-Right:</span> <input type="file" id="docs3"></p>
+    <p><span class="label">Documents-Back-Left:</span> <input type="file" id="docs4"></p>
     <button type="button" onclick="submitClaim()">Submit Claim</button>
 </form>
+
 
 <script>
     // Fetch policy data securely from backend
