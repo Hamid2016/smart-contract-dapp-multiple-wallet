@@ -69,10 +69,45 @@ function openMapModal() {
                 btn.style.cursor = 'pointer';
                 btn.style.borderRadius = '4px';
                 btn.style.boxShadow = '0 1px 4px rgba(0,0,0,0.3)';
-
+                // shows current location
                 btn.onclick = function() {
-                    alert("📍 Location button clicked (no functionality yet)");
+                    if (!navigator.geolocation) {
+                        alert("Geolocation is not supported by your browser.");
+                        return;
+                    }
+
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+                            const userLocation = L.latLng(lat, lng);
+
+                            if (marker) {
+                                marker.setLatLng(userLocation);
+                            } else {
+                                marker = L.marker(userLocation).addTo(map);
+                            }
+
+                            map.setView(userLocation, 16);
+
+                            // Reverse geocode to get address
+                            fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    const address = data.display_name || `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+                                    document.getElementById('location').value = address;
+                                })
+                                .catch(error => {
+                                    console.error("Reverse geocoding failed:", error);
+                                    document.getElementById('location').value = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+                                });
+                        },
+                        function(error) {
+                            alert("Unable to retrieve your location.");
+                        }
+                    );
                 };
+                
 
                 return btn;
             },
