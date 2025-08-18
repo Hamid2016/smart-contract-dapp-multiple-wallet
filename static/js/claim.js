@@ -57,6 +57,35 @@ function openMapModal() {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
+        // 📍 Add location button (no functionality yet)
+        L.Control.MyLocation = L.Control.extend({
+            onAdd: function(map) {
+                const btn = L.DomUtil.create('button');
+                btn.innerHTML = '📍';
+                btn.title = 'Use My Location';
+                btn.style.background = '#fff';
+                btn.style.border = '2px solid #ccc';
+                btn.style.padding = '6px';
+                btn.style.cursor = 'pointer';
+                btn.style.borderRadius = '4px';
+                btn.style.boxShadow = '0 1px 4px rgba(0,0,0,0.3)';
+
+                btn.onclick = function() {
+                    alert("📍 Location button clicked (no functionality yet)");
+                };
+
+                return btn;
+            },
+            onRemove: function(map) {}
+        });
+
+        L.control.myLocation = function(opts) {
+            return new L.Control.MyLocation(opts);
+        }
+
+        L.control.myLocation({ position: 'topleft' }).addTo(map);
+
+        // 🖱️ Handle map click
         map.on('click', function(e) {
             const { lat, lng } = e.latlng;
 
@@ -72,16 +101,15 @@ function openMapModal() {
                 .then(data => {
                     const address = data.display_name || `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
                     document.getElementById('location').value = address;
-                    // closeMapModal();
                 })
                 .catch(error => {
                     console.error("Reverse geocoding failed:", error);
                     document.getElementById('location').value = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
-                    // closeMapModal();
                 });
         });
     }
 }
+
 
 function closeMapModal() {
     document.getElementById('mapModal').style.display = 'none';
