@@ -118,7 +118,40 @@ function openMapModal() {
             return new L.Control.MyLocation(opts);
         }
 
+        //add searchbox
+        L.Control.SearchBox = L.Control.extend({
+            onAdd: function(map) {
+                const container = L.DomUtil.create('div');
+                container.style.background = '#fff';
+                container.style.padding = '4px';
+                container.style.borderRadius = '4px';
+                container.style.boxShadow = '0 1px 4px rgba(0,0,0,0.3)';
+
+                const input = L.DomUtil.create('input', '', container);
+                input.type = 'text';
+                input.placeholder = 'Search location...';
+                input.style.width = '160px';
+                input.style.padding = '4px';
+                input.style.border = '1px solid #ccc';
+                input.style.borderRadius = '4px';
+
+                L.DomEvent.disableClickPropagation(container); // Prevent map drag while typing
+
+                return container;
+            },
+            onRemove: function(map) {}
+        });
+
+        L.control.searchBox = function(opts) {
+            return new L.Control.SearchBox(opts);
+        };
+
+        //location for location btn
         L.control.myLocation({ position: 'topleft' }).addTo(map);
+
+        //location for search
+        L.control.searchBox({ position: 'topright' }).addTo(map);
+
 
         // 🖱️ Handle map click
         map.on('click', function(e) {
