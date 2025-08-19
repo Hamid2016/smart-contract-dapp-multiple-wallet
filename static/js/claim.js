@@ -128,6 +128,7 @@ function openMapModal() {
                 container.style.boxShadow = '0 1px 4px rgba(0,0,0,0.3)';
 
                 const input = L.DomUtil.create('input', '', container);
+                input.id = 'mapSearchInput';// id for searchbox
                 input.type = 'text';
                 input.placeholder = 'Search location...';
                 input.style.width = '160px';
@@ -151,6 +152,40 @@ function openMapModal() {
 
         //location for search
         L.control.searchBox({ position: 'topright' }).addTo(map);
+
+        //
+        document.getElementById('mapSearchInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const query = e.target.value.trim();
+                if (!query) return;
+
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(results => {
+                        if (results.length === 0) {
+                            alert("Location not found.");
+                            return;
+                        }
+
+                        const { lat, lon, display_name } = results[0];
+                        const location = L.latLng(lat, lon);
+
+                        if (marker) {
+                            marker.setLatLng(location);
+                        } else {
+                            marker = L.marker(location).addTo(map);
+                        }
+
+                        map.setView(location, 14);
+                        document.getElementById('location').value = display_name;
+                    })
+                    .catch(error => {
+                        console.error("Search failed:", error);
+                        alert("Error searching location.");
+                    });
+            }
+        });
+
 
 
         // 🖱️ Handle map click
