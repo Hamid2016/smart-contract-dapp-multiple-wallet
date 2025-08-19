@@ -65,7 +65,7 @@ function openMapModal() {
                 btn.title = 'Use My Location';
                 btn.style.background = '#fff';
                 btn.style.border = '2px solid #ccc';
-                btn.style.padding = '6px';
+                btn.style.padding = '1px';
                 btn.style.cursor = 'pointer';
                 btn.style.borderRadius = '4px';
                 btn.style.boxShadow = '0 1px 4px rgba(0,0,0,0.3)';
