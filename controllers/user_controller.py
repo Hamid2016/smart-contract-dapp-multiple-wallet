@@ -1,48 +1,25 @@
-# user_controller.py
-
 from models.user import UserModel
 
 class UserController:
     def __init__(self):
-        # Initialize the UserModel to access database operations
         self.model = UserModel()
 
-    def register_user(self, username, password):
-        """
-        Creates a new user with a hashed password.
-        Returns True if successful, False if username already exists.
-        """
-        return self.model.create_user(username, password)
+    def register(self, username, password, email, phone_number, country, ip_address, browser, os):
+        success = self.model.create_user(username, password, email, phone_number, country, ip_address, browser, os)
+        if success:
+            return {"success": True, "message": "User registered successfully"}
+        return {"success": False, "message": "Username already exists"}
 
-    def login_user(self, username, password):
-        """
-        Validates user credentials.
-        If valid, updates last_login and returns user data.
-        If invalid, returns None.
-        """
+    def login(self, username, password):
         user = self.model.validate_user(username, password)
         if user:
             self.model.update_login_time(username)
-            return user
-        return None
+            return {"success": True, "message": "Login successful"}
+        return {"success": False, "message": "Invalid credentials"}
 
-    def logout_user(self, username):
-        """
-        Updates last_logout timestamp.
-        You can call this when the user logs out.
-        """
+    def logout(self, username):
         self.model.update_logout_time(username)
-        return True
+        return {"success": True, "message": "Logout recorded"}
 
-    def get_user(self, username):
-        """
-        Retrieves user data by username.
-        Returns a dictionary with user info or None.
-        """
+    def get_user_info(self, username):
         return self.model.get_user(username)
-
-    def close(self):
-        """
-        Closes the database connection.
-        """
-        self.model.close()

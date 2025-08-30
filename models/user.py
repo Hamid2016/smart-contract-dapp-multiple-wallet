@@ -1,5 +1,3 @@
-# user.py
-
 import sqlite3
 from datetime import datetime
 import hashlib
@@ -16,6 +14,12 @@ class UserModel:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
+                email TEXT,
+                phone_number TEXT,
+                country TEXT,
+                ip_address TEXT,
+                browser TEXT,
+                os TEXT,
                 last_login TEXT,
                 last_logout TEXT
             )
@@ -25,15 +29,19 @@ class UserModel:
     def hash_password(self, password):
         return hashlib.sha256(password.encode()).hexdigest()
 
-    def create_user(self, username, password):
+    def create_user(self, username, password, email=None, phone_number=None,
+                    country=None, ip_address=None, browser=None, os=None):
         hashed_pw = self.hash_password(password)
         try:
             self.cursor.execute("""
-                INSERT INTO users (username, password) VALUES (?, ?)
-            """, (username, hashed_pw))
+                INSERT INTO users (username, password, email, phone_number, country,
+                                   ip_address, browser, os)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (username, hashed_pw, email, phone_number, country, ip_address, browser, os))
             self.conn.commit()
             return True
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError as e:
+            print("User creation failed:", e)
             return False
 
     def validate_user(self, username, password):
@@ -46,7 +54,7 @@ class UserModel:
     def update_login_time(self, username):
         now = datetime.utcnow().isoformat()
         self.cursor.execute("""
-            UPDATE users SET last_login = ? WHERE username = ?
+            UPDATE users SET last_login = ?WHERE username = ?
         """, (now, username))
         self.conn.commit()
 
