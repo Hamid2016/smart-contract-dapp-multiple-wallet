@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request,Depends
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -12,10 +12,14 @@ import json
 # Controllers
 from controllers.wallet_controller import WalletController
 from controllers.policy_controller import PolicyController
+from controllers.user_controller import UserController
+
 
 # Initialize controllers
 wallet_controller = WalletController()
 policy_controller = PolicyController()
+user_controller = UserController()
+
 
 # Logging setup
 LOG_DIR = "logs"
@@ -41,6 +45,18 @@ if not web3.is_connected():
 contract_address = os.getenv("CONTRACT_ADDRESS")
 contract_abi = json.loads(os.getenv("CONTRACT_ABI"))
 contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+
+# Model for user loging logout register
+class AuthData(BaseModel):
+    username: str
+    password: str
+
+# claim data model
+class ClaimData(BaseModel):
+    policy_name: str
+    coverage: str
+    premium: str
+    status: bool
 
 # Request models
 class WalletData(BaseModel):
@@ -134,27 +150,21 @@ async def get_policies(data: GetPolicyData):
 # Claim redirect with cookie
 @app.get("/claim/{policy_name}")
 async def claim_redirect(
-    request: Request,
     policy_name: str,
-    coverage: str,
-    premium: str,
-    status: bool
+    data: ClaimData = Depends()
 ):
+    # Override the model's policy_name with the path param
+    data.policy_name = policy_name
+
     response = RedirectResponse(url="/static/claim.html")
     response.set_cookie(
         key="policy_data",
-        value=json.dumps({
-            "name": policy_name,
-            "coverage": coverage,
-            "premium": premium,
-            "status": status
-        }),
+        value=data.json(),
         httponly=True,
-        secure=False,  # Set to True in production
+        secure=False,
         samesite="lax"
     )
     return response
-
 # Fetch policy data from cookie
 @app.post("/get-policy-data")
 async def get_policy_data(request: Request):
@@ -174,6 +184,29 @@ async def log_frontend_event(entry: FrontendLog):
         return {"status": "success", "alert": entry.message}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Logging failed: {str(e)}")
+
+# user endpoints
+@app.post("/register")
+def register_user(auth_data: AuthData):
+    result = user_controller.register(auth_data.username, auth_data.password)
+    if not result["success"]:
+        raise HTTPException(status_code=400, detail=result["message"])
+    return result
+
+@app.post("/login")
+def login_user(auth_data: AuthData):
+    result = user_controller.login(auth_data.username, auth_data.password)
+    if not result["success"]:
+        raise HTTPException(status_code=401, detail=result["message"])
+    return result
+
+@app.post("/logout")
+def logout_user(auth_data: AuthData):
+    result = user_controller.logout(auth_data.username)
+    if not result["success"]:
+        raise HTTPException(status_code=400, detail=result["message"])
+    return result
+# user endpoints
 
 # Run server
 if __name__ == "__main__":
