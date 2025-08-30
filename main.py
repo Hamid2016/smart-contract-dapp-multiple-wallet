@@ -54,13 +54,6 @@ class AuthData(BaseModel):
     phone_number: str = None
     country: str = None
 
-# claim data model
-class ClaimData(BaseModel):
-    policy_name: str
-    coverage: str
-    premium: str
-    status: bool
-
 # Request models
 class WalletData(BaseModel):
     address: str
@@ -153,20 +146,28 @@ async def get_policies(data: GetPolicyData):
 # Claim redirect with cookie
 @app.get("/claim/{policy_name}")
 async def claim_redirect(
-    policy_name: str,
-    data: ClaimData = Depends()
+        request: Request,
+        policy_name: str,
+        coverage: str,
+        premium: str,
+        status: bool
 ):
-    # Override the model's policy_name with the path param
-    data.policy_name = policy_name
-
     response = RedirectResponse(url="/static/claim.html")
+
+    # Store data in a secure HTTP-only cookie
     response.set_cookie(
         key="policy_data",
-        value=data.json(),
-        httponly=True,
-        secure=False,
-        samesite="lax"
+        value=json.dumps({
+            "name": policy_name,
+            "coverage": coverage,
+            "premium": premium,
+            "status": status
+        }),
+        httponly=True,  # Prevents JavaScript access
+        secure=True,  # Only send over HTTPS
+        samesite="lax"  # Basic CSRF protection
     )
+
     return response
 # Fetch policy data from cookie
 @app.post("/get-policy-data")
