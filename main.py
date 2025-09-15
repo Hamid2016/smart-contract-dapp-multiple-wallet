@@ -13,12 +13,16 @@ import json
 from controllers.wallet_controller import WalletController
 from controllers.policy_controller import PolicyController
 from controllers.user_controller import UserController
+from controllers.user_wallet_controller import UserWalletController
+
 
 
 # Initialize controllers
 wallet_controller = WalletController()
 policy_controller = PolicyController()
 user_controller = UserController()
+user_wallet_controller = UserWalletController()
+
 
 
 # Logging setup
